@@ -23,6 +23,25 @@ struct BitMask {
     T set;
 };
 
+template <
+    typename IO,
+    typename BackT,
+    uintptr_t addr,
+    unsigned width,
+    unsigned off,
+    typename ValT
+>
+struct ModeField {
+    static constexpr BackT mask = ((1U << width) - 1U) << off;
+    static void set(ValT v)
+    {
+        auto r = IO::read(addr);
+        r &= ~mask;
+        r |= (static_cast<BackT>(v) << off);
+        IO::write(addr, r);
+    }
+};
+
 };
 
 #endif
