@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "mmio.h"
 
 static uint32_t io_buf[256];
@@ -43,4 +45,5 @@ int main()
     TestReg::clear(TestBits::Bit0);
     TestReg::read().set(TestBits::Bit2).write();
     TestReg::get(TestBits::Bit0);
+    printf("0x%x\n", TestReg::read().val);
 }
