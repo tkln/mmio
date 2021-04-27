@@ -59,6 +59,14 @@ struct ModeField {
         r |= (static_cast<BackT>(v) << off);
         RegBase::IO::write(addr, r);
     }
+
+    template <typename AddrT>
+    static ValT get(AddrT addr)
+    {
+        auto r = RegBase::IO::read(addr);
+        r &= ~mask;
+        return static_cast<ValT>(r >> off);
+    }
 };
 
 template <typename M, typename B>
@@ -109,6 +117,13 @@ struct BitField {
         auto r = RegBase::IO::read(addr);
         r &= ~get_mask<BackT>(v...);
         RegBase::IO::write(addr, r);
+    }
+
+    template <typename AddrT>
+    static bool get(AddrT addr, ValT bit)
+    {
+        auto r = RegBase::IO::read(addr);
+        return r &= get_mask<BackT>(bit);
     }
 };
 
@@ -173,6 +188,12 @@ struct Register {
     static void clear(Vals... v)
     {
         Impl::clear(addr, v...);
+    }
+
+    template <typename ValT>
+    static auto get(ValT v)
+    {
+        return Impl::get(addr, v);
     }
 
     [[nodiscard]]

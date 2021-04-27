@@ -29,4 +29,5 @@ int main()
     TestReg::set(TestBits::Bit0, TestBits::Bit1);
     TestReg::clear(TestBits::Bit0);
     TestReg::read().set(TestBits::Bit2).write();
+    TestReg::get(TestBits::Bit0);
 }
