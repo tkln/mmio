@@ -23,11 +23,10 @@ struct BitMask {
     T set;
 };
 
-template <typename IOImpl, typename BackType, auto reg_addr>
+template <typename IOImpl, typename BackType>
 struct RegisterBase {
     using IO = IOImpl;
     using BackT = BackType;
-    static constexpr auto addr = reg_addr;
 };
 
 template <
@@ -39,12 +38,12 @@ template <
 struct ModeField {
     using BackT = typename RegBase::BackT;
     static constexpr BackT mask = ((1U << width) - 1U) << off;
-    static void set(ValT v)
+    static void set(uintptr_t addr, ValT v)
     {
-        auto r = RegBase::IO::read(RegBase::addr);
+        auto r = RegBase::IO::read(addr);
         r &= ~mask;
         r |= (static_cast<BackT>(v) << off);
-        RegBase::IO::write(RegBase::addr, r);
+        RegBase::IO::write(addr, r);
     }
 };
 
@@ -81,21 +80,21 @@ struct BitField {
     using T = ValT;
 
     template <typename... Bits>
-    static void set(Bits... v)
+    static void set(uintptr_t addr, Bits... v)
     {
         check_types<ValT>(v...);
-        auto r = RegBase::IO::read(RegBase::addr);
+        auto r = RegBase::IO::read(addr);
         r |= get_mask<BackT>(v...);
-        RegBase::IO::write(RegBase::addr, r);
+        RegBase::IO::write(addr, r);
     }
 
     template <typename... Bits>
-    static void clear(Bits... v)
+    static void clear(uintptr_t addr, Bits... v)
     {
         check_types<ValT>(v...);
-        auto r = RegBase::IO::read(RegBase::addr);
+        auto r = RegBase::IO::read(addr);
         r &= ~get_mask<BackT>(v...);
-        RegBase::IO::write(RegBase::addr, r);
+        RegBase::IO::write(addr, r);
     }
 };
 
@@ -111,19 +110,19 @@ template <
 >
 struct Register {
     using ImplIO = IO;
-    using RegBase = RegisterBase<IO, BaseT, addr>;
+    using RegBase = RegisterBase<IO, BaseT>;
     using Impl = RegisterImpl<Fields<RegBase>...>;
 
     template <typename... Vals>
     static void set(Vals... v)
     {
-        Impl::set(v...);
+        Impl::set(addr, v...);
     }
 
     template <typename... Vals>
     static void clear(Vals... v)
     {
-        Impl::clear(v...);
+        Impl::clear(addr, v...);
     }
 };
 
