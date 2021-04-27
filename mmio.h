@@ -50,7 +50,9 @@ template <
 struct ModeField {
     using BackT = typename RegBase::BackT;
     static constexpr BackT mask = ((1U << width) - 1U) << off;
-    static void set(uintptr_t addr, ValT v)
+
+    template <typename AddrT>
+    static void set(AddrT addr, ValT v)
     {
         auto r = RegBase::IO::read(addr);
         r &= ~mask;
@@ -91,8 +93,8 @@ struct BitField {
     static constexpr BackT mask = ((1U << width) - 1U) << off;
     using T = ValT;
 
-    template <typename... Bits>
-    static void set(uintptr_t addr, Bits... v)
+    template <typename AddrT, typename... Bits>
+    static void set(AddrT addr, Bits... v)
     {
         check_types<ValT>(v...);
         auto r = RegBase::IO::read(addr);
@@ -100,8 +102,8 @@ struct BitField {
         RegBase::IO::write(addr, r);
     }
 
-    template <typename... Bits>
-    static void clear(uintptr_t addr, Bits... v)
+    template <typename AddrT, typename... Bits>
+    static void clear(AddrT addr, Bits... v)
     {
         check_types<ValT>(v...);
         auto r = RegBase::IO::read(addr);
