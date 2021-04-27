@@ -19,13 +19,13 @@ struct VolatileIO {
 
 template <typename T>
 struct ValIO {
-    static T read(uintptr_t addr)
+    static T read(T *addr)
     {
-        return *(T *)addr;
+        return *addr;
     }
-    static void write(uintptr_t addr, T val)
+    static void write(T *addr, T val)
     {
-        *(T *)addr = val;
+        *addr = val;
     }
 };
 
@@ -131,7 +131,7 @@ struct RegisterVal {
     [[nodiscard]]
     RegisterVal set(Vals... v)
     {
-        Impl::set(reinterpret_cast<uintptr_t>(&val), v...);
+        Impl::set(&val, v...);
         return *this;
     }
 
@@ -139,7 +139,7 @@ struct RegisterVal {
     [[nodiscard]]
     RegisterVal clear(Vals... v)
     {
-        Impl::clear(reinterpret_cast<uintptr_t>(&val), v...);
+        Impl::clear(&val, v...);
         return *this;
     }
 
