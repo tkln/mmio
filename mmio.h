@@ -67,6 +67,8 @@ struct ModeField {
         r &= ~mask;
         return static_cast<ValT>(r >> off);
     }
+
+    static void clear(void) = delete;
 };
 
 template <typename M, typename B>
@@ -129,6 +131,9 @@ struct BitField {
 
 template <typename... Fields>
 struct RegisterImpl : Fields... {
+    using Fields::set...;
+    using Fields::get...;
+    using Fields::clear...;
 };
 
 template <typename RegBase, template <typename FRegBase> typename... Fields>
