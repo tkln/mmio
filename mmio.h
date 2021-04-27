@@ -208,6 +208,46 @@ struct Register {
     }
 };
 
+template <
+    typename IO,
+    typename BaseT,
+    typename Addr,
+    template <typename RegBase> typename... Fields
+>
+struct DynRegister {
+    using ImplIO = IO;
+    using RegBase = RegisterBase<IO, BaseT>;
+    using Impl = RegisterImpl<Fields<RegBase>...>;
+
+    DynRegister(Addr addr) : addr(addr) { }
+
+    template <typename... Vals>
+    void set(Vals... v)
+    {
+        Impl::set(addr, v...);
+    }
+
+    template <typename... Vals>
+    void clear(Vals... v)
+    {
+        Impl::clear(addr, v...);
+    }
+
+    template <typename ValT>
+    auto get(ValT v)
+    {
+        return Impl::get(addr, v);
+    }
+
+    [[nodiscard]]
+    RegisterVal<RegBase, Fields...> read()
+    {
+        return RegisterVal<RegBase, Fields...>(addr);
+    }
+
+    Addr addr;
+};
+
 };
 
 #endif
