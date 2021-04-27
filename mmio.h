@@ -23,22 +23,28 @@ struct BitMask {
     T set;
 };
 
+template <typename IOImpl, typename BackType, auto reg_addr>
+struct RegisterBase {
+    using IO = IOImpl;
+    using BackT = BackType;
+    static constexpr auto addr = reg_addr;
+};
+
 template <
-    typename IO,
-    typename BackT,
-    uintptr_t addr,
+    typename RegBase,
     unsigned width,
     unsigned off,
     typename ValT
 >
 struct ModeField {
+    using BackT = typename RegBase::BackT;
     static constexpr BackT mask = ((1U << width) - 1U) << off;
     static void set(ValT v)
     {
-        auto r = IO::read(addr);
+        auto r = RegBase::IO::read(RegBase::addr);
         r &= ~mask;
         r |= (static_cast<BackT>(v) << off);
-        IO::write(addr, r);
+        RegBase::IO::write(RegBase::addr, r);
     }
 };
 
@@ -64,14 +70,13 @@ static constexpr void check_types(T v, Ts... vs)
 }
 
 template <
-    typename IO,
-    typename BackT,
-    uintptr_t addr,
+    typename RegBase,
     unsigned width,
     unsigned off,
     typename ValT
 >
 struct BitField {
+    using BackT = typename RegBase::BackT;
     static constexpr BackT mask = ((1U << width) - 1U) << off;
     using T = ValT;
 
@@ -79,18 +84,18 @@ struct BitField {
     static void set(Bits... v)
     {
         check_types<ValT>(v...);
-        auto r = IO::read(addr);
+        auto r = RegBase::IO::read(RegBase::addr);
         r |= get_mask<BackT>(v...);
-        IO::write(addr, r);
+        RegBase::IO::write(RegBase::addr, r);
     }
 
     template <typename... Bits>
     static void clear(Bits... v)
     {
         check_types<ValT>(v...);
-        auto r = IO::read(addr);
+        auto r = RegBase::IO::read(RegBase::addr);
         r &= ~get_mask<BackT>(v...);
-        IO::write(addr, r);
+        RegBase::IO::write(RegBase::addr, r);
     }
 };
 
@@ -102,11 +107,12 @@ template <
     typename IO,
     typename BaseT,
     auto addr,
-    template <typename FIO, auto faddr> typename... Fields
+    template <typename RegBase> typename... Fields
 >
 struct Register {
     using ImplIO = IO;
-    using Impl = RegisterImpl<Fields<ImplIO, addr>...>;
+    using RegBase = RegisterBase<IO, BaseT, addr>;
+    using Impl = RegisterImpl<Fields<RegBase>...>;
 
     template <typename... Vals>
     static void set(Vals... v)

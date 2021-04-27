@@ -20,8 +20,8 @@ enum class TestBits {
     Bit3,
 };
 
-template <typename IO, auto addr>
-using TestBitField = mmio::BitField<IO, uint32_t, addr, 2, 0, TestBits>;
+template <typename RegBase>
+using TestBitField = mmio::BitField<RegBase, 2, 0, TestBits>;
 using TestReg = mmio::Register<DummyIO, uint32_t, 0x1, TestBitField>;
 
 int main()
