@@ -94,6 +94,33 @@ struct BitField {
     }
 };
 
+template <typename... Fields>
+struct RegisterImpl : Fields... {
+};
+
+template <
+    typename IO,
+    typename BaseT,
+    auto addr,
+    template <typename FIO, auto faddr> typename... Fields
+>
+struct Register {
+    using ImplIO = IO;
+    using Impl = RegisterImpl<Fields<ImplIO, addr>...>;
+
+    template <typename... Vals>
+    static void set(Vals... v)
+    {
+        Impl::set(v...);
+    }
+
+    template <typename... Vals>
+    static void clear(Vals... v)
+    {
+        Impl::clear(v...);
+    }
+};
+
 };
 
 #endif
