@@ -7,11 +7,11 @@ namespace mmio {
 
 template <typename T>
 struct VolatileIO {
-    static T read(uintptr_t addr)
+    static inline T read(uintptr_t addr)
     {
         return *(volatile T *)addr;
     }
-    static void write(uintptr_t addr, T val)
+    static inline void write(uintptr_t addr, T val)
     {
         *(volatile T *)addr = val;
     }
@@ -19,11 +19,11 @@ struct VolatileIO {
 
 template <typename T>
 struct ValIO {
-    static T read(T *addr)
+    static inline T read(T *addr)
     {
         return *addr;
     }
-    static void write(T *addr, T val)
+    static inline void write(T *addr, T val)
     {
         *addr = val;
     }
@@ -52,7 +52,7 @@ struct ModeField {
     static constexpr BackT mask = ((1U << width) - 1U) << off;
 
     template <typename AddrT>
-    static void set(AddrT addr, ValT v)
+    static inline void set(AddrT addr, ValT v)
     {
         auto r = RegBase::IO::read(addr);
         r &= ~mask;
@@ -61,7 +61,7 @@ struct ModeField {
     }
 
     template <typename AddrT>
-    static ValT get(AddrT addr)
+    static inline ValT get(AddrT addr)
     {
         auto r = RegBase::IO::read(addr);
         r &= ~mask;
@@ -104,7 +104,7 @@ struct BitField {
     using T = ValT;
 
     template <typename AddrT, typename... Bits>
-    static void set(AddrT addr, Bits... v)
+    static inline void set(AddrT addr, Bits... v)
     {
         check_types<ValT>(v...);
         auto r = RegBase::IO::read(addr);
@@ -113,7 +113,7 @@ struct BitField {
     }
 
     template <typename AddrT, typename... Bits>
-    static void clear(AddrT addr, Bits... v)
+    static inline void clear(AddrT addr, Bits... v)
     {
         check_types<ValT>(v...);
         auto r = RegBase::IO::read(addr);
@@ -122,7 +122,7 @@ struct BitField {
     }
 
     template <typename AddrT>
-    static bool get(AddrT addr, ValT bit)
+    static inline bool get(AddrT addr, ValT bit)
     {
         auto r = RegBase::IO::read(addr);
         return r &= get_mask<BackT>(bit);
@@ -142,14 +142,14 @@ struct RegisterVal {
     using ImplRegBase = RegisterBase<ValIO<BackT>, BackT>;
     using Impl = RegisterImpl<Fields<ImplRegBase>...>;
 
-    RegisterVal(uintptr_t addr) : addr(addr)
+    inline RegisterVal(uintptr_t addr) : addr(addr)
     {
         val = RegBase::IO::read(addr);
     }
 
     template <typename... Vals>
     [[nodiscard]]
-    RegisterVal set(Vals... v)
+    inline RegisterVal set(Vals... v)
     {
         Impl::set(&val, v...);
         return *this;
@@ -157,13 +157,13 @@ struct RegisterVal {
 
     template <typename... Vals>
     [[nodiscard]]
-    RegisterVal clear(Vals... v)
+    inline RegisterVal clear(Vals... v)
     {
         Impl::clear(&val, v...);
         return *this;
     }
 
-    void write()
+    inline void write()
     {
         RegBase::IO::write(addr, val);
     }
@@ -184,25 +184,25 @@ struct Register {
     using Impl = RegisterImpl<Fields<RegBase>...>;
 
     template <typename... Vals>
-    static void set(Vals... v)
+    static inline void set(Vals... v)
     {
         Impl::set(addr, v...);
     }
 
     template <typename... Vals>
-    static void clear(Vals... v)
+    static inline void clear(Vals... v)
     {
         Impl::clear(addr, v...);
     }
 
     template <typename ValT>
-    static auto get(ValT v)
+    static inline auto get(ValT v)
     {
         return Impl::get(addr, v);
     }
 
     [[nodiscard]]
-    static RegisterVal<RegBase, Fields...> read()
+    static inline RegisterVal<RegBase, Fields...> read()
     {
         return RegisterVal<RegBase, Fields...>(addr);
     }
@@ -222,25 +222,25 @@ struct DynRegister {
     DynRegister(Addr addr) : addr(addr) { }
 
     template <typename... Vals>
-    void set(Vals... v)
+    inline void set(Vals... v)
     {
         Impl::set(addr, v...);
     }
 
     template <typename... Vals>
-    void clear(Vals... v)
+    inline void clear(Vals... v)
     {
         Impl::clear(addr, v...);
     }
 
     template <typename ValT>
-    auto get(ValT v)
+    inline auto get(ValT v)
     {
         return Impl::get(addr, v);
     }
 
     [[nodiscard]]
-    RegisterVal<RegBase, Fields...> read()
+    inline RegisterVal<RegBase, Fields...> read()
     {
         return RegisterVal<RegBase, Fields...>(addr);
     }
