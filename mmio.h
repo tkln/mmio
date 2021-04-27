@@ -7,11 +7,11 @@ namespace mmio {
 
 template <typename T>
 struct VolatileIO {
-    T read(uintptr_t addr)
+    static T read(uintptr_t addr)
     {
         return *(volatile T *)addr;
     }
-    void write(uintptr_t addr, T val)
+    static void write(uintptr_t addr, T val)
     {
         *(volatile T *)addr = val;
     }
