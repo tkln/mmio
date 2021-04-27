@@ -18,6 +18,18 @@ struct VolatileIO {
 };
 
 template <typename T>
+struct ValIO {
+    static T read(uintptr_t addr)
+    {
+        return *(T *)addr;
+    }
+    static void write(uintptr_t addr, T val)
+    {
+        *(T *)addr = val;
+    }
+};
+
+template <typename T>
 struct BitMask {
     T clear;
     T set;
@@ -102,6 +114,42 @@ template <typename... Fields>
 struct RegisterImpl : Fields... {
 };
 
+template <typename RegBase, template <typename FRegBase> typename... Fields>
+struct RegisterVal {
+    using BackT = typename RegBase::BackT;
+    using ImplRegBase = RegisterBase<ValIO<BackT>, BackT>;
+    using Impl = RegisterImpl<Fields<ImplRegBase>...>;
+
+    RegisterVal(uintptr_t addr) : addr(addr)
+    {
+        val = RegBase::IO::read(addr);
+    }
+
+    template <typename... Vals>
+    [[nodiscard]]
+    RegisterVal set(Vals... v)
+    {
+        Impl::set(reinterpret_cast<uintptr_t>(&val), v...);
+        return *this;
+    }
+
+    template <typename... Vals>
+    [[nodiscard]]
+    RegisterVal clear(Vals... v)
+    {
+        Impl::clear(reinterpret_cast<uintptr_t>(&val), v...);
+        return *this;
+    }
+
+    void write()
+    {
+        RegBase::IO::write(addr, val);
+    }
+
+    BackT val;
+    const uintptr_t addr;
+};
+
 template <
     typename IO,
     typename BaseT,
@@ -123,6 +171,12 @@ struct Register {
     static void clear(Vals... v)
     {
         Impl::clear(addr, v...);
+    }
+
+    [[nodiscard]]
+    static RegisterVal<RegBase, Fields...> read()
+    {
+        return RegisterVal<RegBase, Fields...>(addr);
     }
 };
 
