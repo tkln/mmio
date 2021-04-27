@@ -13,6 +13,17 @@ struct DummyIO {
     }
 };
 
+enum class TestBits {
+    Bit0,
+    Bit1,
+    Bit2,
+    Bit3,
+};
+
+
+using TestBitField = mmio::BitField<DummyIO, uint32_t, 0x0, 2, 0, TestBits>;
+
 int main()
 {
+    TestBitField::set(TestBits::Bit0, TestBits::Bit1);
 }
