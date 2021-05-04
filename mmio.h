@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021 Aapo Vienamo
+ * SPDX-License-Identifier: LGPL-3.0-only
+ */
+
 #ifndef MMIO_H
 #define MMIO_H
 

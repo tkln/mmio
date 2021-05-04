@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021 Aapo Vienamo
+ * SPDX-License-Identifier: LGPL-3.0-only
+ */
+
 #include <cstdio>
 
 #include "mmio.h"
