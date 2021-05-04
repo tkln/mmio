@@ -7,13 +7,28 @@ namespace mmio {
 
 template <typename T>
 struct VolatileIO {
-    static inline T read(uintptr_t addr)
+    template <typename AddrT>
+    static inline volatile T *addr_cast(AddrT addr)
     {
-        return *(volatile T *)addr;
+        /*
+         * Performing a static_cast before reinterpret_cast prevents
+         * accidentally using objects that don't generally look like numbers as
+         * memory addresses.
+         */
+        uintptr_t uintptr = static_cast<uintptr_t>(addr);
+        return reinterpret_cast<volatile T *>(uintptr);
     }
-    static inline void write(uintptr_t addr, T val)
+
+    template <typename AddrT>
+    static inline T read(AddrT addr)
     {
-        *(volatile T *)addr = val;
+        return *addr_cast(addr);
+    }
+
+    template <typename AddrT>
+    static inline void write(AddrT addr, T val)
+    {
+        *addr_cast(addr) = val;
     }
 };
 
