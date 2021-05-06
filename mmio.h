@@ -187,6 +187,12 @@ struct RegisterVal {
         return *this;
     }
 
+    template <typename ValT>
+    inline RegisterVal get(ValT v) const
+    {
+        return Impl::get(&val, v);
+    }
+
     inline void write()
     {
         RegBase::IO::write(addr, val);
