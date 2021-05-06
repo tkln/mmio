@@ -203,7 +203,6 @@ template <
     template <typename RegBase> typename... Fields
 >
 struct Register {
-    using ImplIO = IO;
     using RegBase = RegisterBase<IO, BaseT>;
     using Impl = RegisterImpl<RegBase, Fields...>;
 
@@ -239,7 +238,6 @@ template <
     template <typename RegBase> typename... Fields
 >
 struct DynRegister {
-    using ImplIO = IO;
     using RegBase = RegisterBase<IO, BaseT>;
     using Impl = RegisterImpl<RegBase, Fields...>;
 
