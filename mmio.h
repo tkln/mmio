@@ -149,18 +149,18 @@ struct BitField {
     }
 };
 
-template <typename... Fields>
-struct RegisterImpl : Fields... {
-    using Fields::set...;
-    using Fields::get...;
-    using Fields::clear...;
+template <typename RegBase, template <typename FRegBase> typename... Fields>
+struct RegisterImpl : Fields<RegBase>... {
+    using Fields<RegBase>::set...;
+    using Fields<RegBase>::get...;
+    using Fields<RegBase>::clear...;
 };
 
 template <typename RegBase, template <typename FRegBase> typename... Fields>
 struct RegisterVal {
     using BackT = typename RegBase::BackT;
     using ImplRegBase = RegisterBase<ValIO<BackT>, BackT>;
-    using Impl = RegisterImpl<Fields<ImplRegBase>...>;
+    using Impl = RegisterImpl<ImplRegBase, Fields...>;
 
     inline RegisterVal(uintptr_t addr) : addr(addr)
     {
@@ -201,7 +201,7 @@ template <
 struct Register {
     using ImplIO = IO;
     using RegBase = RegisterBase<IO, BaseT>;
-    using Impl = RegisterImpl<Fields<RegBase>...>;
+    using Impl = RegisterImpl<RegBase, Fields...>;
     using ValT = RegisterVal<RegBase, Fields...>;
 
     template <typename... Vals>
@@ -238,7 +238,7 @@ template <
 struct DynRegister {
     using ImplIO = IO;
     using RegBase = RegisterBase<IO, BaseT>;
-    using Impl = RegisterImpl<Fields<RegBase>...>;
+    using Impl = RegisterImpl<RegBase, Fields...>;
     using ValT = RegisterVal<RegBase, Fields...>;
 
     DynRegister(Addr addr) : addr(addr) { }
