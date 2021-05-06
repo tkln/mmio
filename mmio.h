@@ -59,24 +59,34 @@ template <typename IOImpl, typename BackType>
 struct RegisterBase {
     using IO = IOImpl;
     using BackT = BackType;
+
+    static constexpr BackT mask(unsigned width, unsigned offset)
+    {
+        return ((1U << width) - 1U) << offset;
+    }
+
+    static constexpr BackT mask(unsigned mask)
+    {
+        return mask;
+    }
 };
 
 template <
     typename RegBase,
-    unsigned width,
-    unsigned off,
+    typename RegBase::BackT mask,
+    unsigned offset,
     typename ValT
 >
 struct ModeField {
     using BackT = typename RegBase::BackT;
-    static constexpr BackT mask = ((1U << width) - 1U) << off;
+    static constexpr BackT shifted_mask = mask << offset;
 
     template <typename AddrT>
     static inline void set(AddrT addr, ValT v)
     {
         auto r = RegBase::IO::read(addr);
-        r &= ~mask;
-        r |= (static_cast<BackT>(v) << off);
+        r &= ~shifted_mask;
+        r |= (static_cast<BackT>(v) << offset);
         RegBase::IO::write(addr, r);
     }
 
@@ -84,8 +94,8 @@ struct ModeField {
     static inline ValT get(AddrT addr)
     {
         auto r = RegBase::IO::read(addr);
-        r &= ~mask;
-        return static_cast<ValT>(r >> off);
+        r &= ~shifted_mask;
+        return static_cast<ValT>(r >> offset);
     }
 
     static void clear(void) = delete;
@@ -114,13 +124,11 @@ static constexpr void check_types(T v, Ts... vs)
 
 template <
     typename RegBase,
-    unsigned width,
-    unsigned off,
+    typename RegBase::BackT mask,
     typename ValT
 >
 struct BitField {
     using BackT = typename RegBase::BackT;
-    static constexpr BackT mask = ((1U << width) - 1U) << off;
     using T = ValT;
 
     template <typename AddrT, typename... Bits>

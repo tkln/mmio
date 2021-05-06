@@ -29,7 +29,7 @@ enum class TestBits {
 };
 
 template <typename RegBase>
-using TestBitField = mmio::BitField<RegBase, 4, 0, TestBits>;
+using TestBitField = mmio::BitField<RegBase, RegBase::mask(4, 0), TestBits>;
 
 enum class TestModes {
     Mode0 = 0,
@@ -37,7 +37,7 @@ enum class TestModes {
 };
 
 template <typename RegBase>
-using TestModeField = mmio::ModeField<RegBase, 1, 4, TestModes>;
+using TestModeField = mmio::ModeField<RegBase, RegBase::mask(1, 0), 4, TestModes>;
 
 using TestReg = mmio::Register<DummyIO, uint32_t, 0x1,
       TestBitField,
