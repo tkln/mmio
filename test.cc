@@ -4,6 +4,7 @@
  */
 
 #include <cstdio>
+#include <string>
 
 #include "mmio.h"
 
@@ -27,28 +28,46 @@ enum class TestBits {
     Bit3,
 };
 
+template <typename RegBase>
+using TestBitField = mmio::BitField<RegBase, 4, 0, TestBits>;
+
 enum class TestModes {
     Mode0 = 0,
     Mode1 = 1,
 };
 
 template <typename RegBase>
-using TestBitField = mmio::BitField<RegBase, 2, 0, TestBits>;
-
-template <typename RegBase>
-using TestModeField = mmio::ModeField<RegBase, 1, 2, TestModes>;
+using TestModeField = mmio::ModeField<RegBase, 1, 4, TestModes>;
 
 using TestReg = mmio::Register<DummyIO, uint32_t, 0x1,
       TestBitField,
       TestModeField
-  >;
+>;
+
+#define assert_eq(_a, _b)                                               \
+    if ((_a) != (_b))                                                   \
+        printf("FAIL(%d): %s != %s: (%s), (%s)\n", __LINE__, #_a, #_b,  \
+               std::to_string(_a).c_str(), std::to_string(_b).c_str());
 
 int main()
 {
     TestReg::set(TestBits::Bit0, TestBits::Bit1);
+    assert_eq(io_buf[1], 0x03);
+    assert_eq(io_buf[0], 0x00);
+
     TestReg::set(TestModes::Mode0);
+    assert_eq(io_buf[1], 0x03);
+    assert_eq(io_buf[0], 0x00);
+
+    TestReg::set(TestModes::Mode1);
+    assert_eq(io_buf[1], 0x13);
+
     TestReg::clear(TestBits::Bit0);
+    assert_eq(io_buf[1], 0x12);
+
     TestReg::read().set(TestBits::Bit2).write();
-    TestReg::get(TestBits::Bit0);
-    printf("0x%x\n", TestReg::read().val);
+    assert_eq(io_buf[1], 0x16);
+
+    assert_eq(TestReg::get(TestBits::Bit0), false);
+    assert_eq(TestReg::get(TestBits::Bit1), true);
 }

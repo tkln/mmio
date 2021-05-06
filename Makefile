@@ -3,4 +3,5 @@
 
 CXXFLAGS=-std=c++17
 test: test.o
+	$(CXX) $(CXXFLAGS) $< -o $@
 test.o: test.cc mmio.h
