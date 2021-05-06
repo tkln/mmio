@@ -240,6 +240,30 @@ struct Register {
 template <
     typename IO,
     typename BaseT,
+    auto addr,
+    template <typename RegBase> typename... Fields
+>
+struct RegisterRO : Register<IO, BaseT, addr, Fields...> {
+    using Reg = Register<IO, BaseT, addr, Fields...>;
+    using Reg::get;
+    using Impl = typename Register<IO, BaseT, addr, Fields...>::Impl;
+
+    static inline const typename Impl::ValT read()
+    {
+        return typename Impl::ValT(addr);
+    }
+
+    template <typename... Vals>
+    static inline void set(Vals... v) = delete;
+
+    template <typename... Vals>
+    static inline void clear(Vals... v) = delete;
+};
+
+
+template <
+    typename IO,
+    typename BaseT,
     typename Addr,
     template <typename RegBase> typename... Fields
 >
