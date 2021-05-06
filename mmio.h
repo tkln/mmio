@@ -202,6 +202,7 @@ struct Register {
     using ImplIO = IO;
     using RegBase = RegisterBase<IO, BaseT>;
     using Impl = RegisterImpl<Fields<RegBase>...>;
+    using ValT = RegisterVal<RegBase, Fields...>;
 
     template <typename... Vals>
     static inline void set(Vals... v)
@@ -222,9 +223,9 @@ struct Register {
     }
 
     [[nodiscard]]
-    static inline RegisterVal<RegBase, Fields...> read()
+    static inline ValT read()
     {
-        return RegisterVal<RegBase, Fields...>(addr);
+        return ValT(addr);
     }
 };
 
@@ -238,6 +239,7 @@ struct DynRegister {
     using ImplIO = IO;
     using RegBase = RegisterBase<IO, BaseT>;
     using Impl = RegisterImpl<Fields<RegBase>...>;
+    using ValT = RegisterVal<RegBase, Fields...>;
 
     DynRegister(Addr addr) : addr(addr) { }
 
@@ -260,9 +262,9 @@ struct DynRegister {
     }
 
     [[nodiscard]]
-    inline RegisterVal<RegBase, Fields...> read()
+    inline ValT read()
     {
-        return RegisterVal<RegBase, Fields...>(addr);
+        return ValT(addr);
     }
 
     Addr addr;
