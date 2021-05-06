@@ -150,10 +150,14 @@ struct BitField {
 };
 
 template <typename RegBase, template <typename FRegBase> typename... Fields>
+struct RegisterVal;
+
+template <typename RegBase, template <typename FRegBase> typename... Fields>
 struct RegisterImpl : Fields<RegBase>... {
     using Fields<RegBase>::set...;
     using Fields<RegBase>::get...;
     using Fields<RegBase>::clear...;
+    using ValT = RegisterVal<RegBase, Fields...>;
 };
 
 template <typename RegBase, template <typename FRegBase> typename... Fields>
@@ -202,7 +206,6 @@ struct Register {
     using ImplIO = IO;
     using RegBase = RegisterBase<IO, BaseT>;
     using Impl = RegisterImpl<RegBase, Fields...>;
-    using ValT = RegisterVal<RegBase, Fields...>;
 
     template <typename... Vals>
     static inline void set(Vals... v)
@@ -223,9 +226,9 @@ struct Register {
     }
 
     [[nodiscard]]
-    static inline ValT read()
+    static inline typename Impl::ValT read()
     {
-        return ValT(addr);
+        return typename Impl::ValT(addr);
     }
 };
 
@@ -239,7 +242,6 @@ struct DynRegister {
     using ImplIO = IO;
     using RegBase = RegisterBase<IO, BaseT>;
     using Impl = RegisterImpl<RegBase, Fields...>;
-    using ValT = RegisterVal<RegBase, Fields...>;
 
     DynRegister(Addr addr) : addr(addr) { }
 
@@ -262,9 +264,9 @@ struct DynRegister {
     }
 
     [[nodiscard]]
-    inline ValT read()
+    inline typename Impl::ValT read()
     {
-        return ValT(addr);
+        return typename Impl::ValT(addr);
     }
 
     Addr addr;
