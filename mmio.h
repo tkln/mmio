@@ -133,6 +133,13 @@ struct BitField {
     }
 
     template <typename AddrT, typename... Bits>
+    static inline void set_wo(AddrT addr, Bits... v)
+    {
+        auto r = get_mask<BackT>(v...);
+        RegBase::IO::write(addr, r);
+    }
+
+    template <typename AddrT, typename... Bits>
     static inline void clear(AddrT addr, Bits... v)
     {
         check_types<ValT>(v...);
@@ -260,6 +267,31 @@ struct RegisterRO : Register<IO, BaseT, addr, Fields...> {
     static inline void clear(Vals... v) = delete;
 };
 
+template <
+    typename IO,
+    typename BaseT,
+    auto addr,
+    template <typename RegBase> typename... Fields
+>
+struct RegisterWO : Register<IO, BaseT, addr, Fields...> {
+    using Reg = Register<IO, BaseT, addr, Fields...>;
+    using Impl = typename Register<IO, BaseT, addr, Fields...>::Impl;
+
+    template <typename... Vals>
+    static inline void set(Vals... v)
+    {
+        Impl::set_wo(addr, v...);
+    }
+
+    template <typename... Vals>
+    static inline void clear(Vals... v) = delete;
+
+    template <typename ValT>
+    static inline auto get(ValT v) = delete;
+
+    /* TODO Bit masks and write() */
+    static inline const typename Impl::ValT read() = delete;
+};
 
 template <
     typename IO,
