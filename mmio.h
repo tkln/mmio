@@ -183,7 +183,6 @@ struct RegisterVal {
 
     inline RegisterVal(uintptr_t addr) : addr(addr)
     {
-        val = RegBase::IO::read(addr);
     }
 
     template <typename... Vals>
@@ -202,10 +201,24 @@ struct RegisterVal {
         return *this;
     }
 
+    [[nodiscard]]
+    inline RegisterVal clear()
+    {
+        val = 0;
+        return *this;
+    }
+
     template <typename ValT>
     inline RegisterVal get(ValT v) const
     {
         return Impl::get(&val, v);
+    }
+
+    [[nodiscard]]
+    inline RegisterVal read()
+    {
+        val = RegBase::IO::read(addr);
+        return *this;
     }
 
     inline void write()
@@ -252,6 +265,12 @@ struct Register {
 
     [[nodiscard]]
     static inline typename Impl::ValT read()
+    {
+        return typename Impl::ValT(addr).read();
+    }
+
+    [[nodiscard]]
+    static inline typename Impl::ValT new_val()
     {
         return typename Impl::ValT(addr);
     }
