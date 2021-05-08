@@ -91,11 +91,11 @@ struct ModeField {
     }
 
     template <typename AddrT>
-    static inline ValT get(AddrT addr)
+    static inline void get(AddrT addr, ValT &v)
     {
         auto r = RegBase::IO::read(addr);
-        r &= ~shifted_mask;
-        return static_cast<ValT>(r >> offset);
+        r &= shifted_mask;
+        v = static_cast<ValT>(r >> offset);
     }
 
     static void clear(void) = delete;
@@ -181,7 +181,7 @@ struct RegisterVal {
     using ImplRegBase = RegisterBase<ValIO<BackT>, BackT>;
     using Impl = RegisterImpl<ImplRegBase, Fields...>;
 
-    inline RegisterVal(uintptr_t addr) : addr(addr)
+    inline RegisterVal(uintptr_t addr) : addr(static_cast<uintptr_t>(addr))
     {
     }
 
@@ -261,6 +261,14 @@ struct Register {
     static inline auto get(ValT v)
     {
         return Impl::get(addr, v);
+    }
+
+    template <typename ValT>
+    static inline auto get()
+    {
+        ValT v;
+        Impl::get(addr, v);
+        return v;
     }
 
     [[nodiscard]]
