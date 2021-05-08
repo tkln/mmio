@@ -239,6 +239,11 @@ struct Register {
         Impl::clear(addr, v...);
     }
 
+    static inline void clear()
+    {
+        RegBase::IO::write(addr, 0);
+    }
+
     template <typename ValT>
     static inline auto get(ValT v)
     {
