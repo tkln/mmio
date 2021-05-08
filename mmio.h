@@ -101,6 +101,42 @@ struct ModeField {
     static void clear(void) = delete;
 };
 
+template <
+    typename RegBase,
+    typename RegBase::BackT mask,
+    unsigned offset,
+    typename ValT
+>
+struct ValueField {
+    using BackT = typename RegBase::BackT;
+    static constexpr BackT shifted_mask = mask << offset;
+
+    template <typename AddrT>
+    static inline void set(AddrT addr, ValT v)
+    {
+        auto r = RegBase::IO::read(addr);
+        r &= ~shifted_mask;
+        r |= (static_cast<BackT>(v) << offset);
+        RegBase::IO::write(addr, r);
+    }
+
+    template <typename AddrT>
+    static inline void get(AddrT addr, ValT &v)
+    {
+        auto r = RegBase::IO::read(addr);
+        r &= shifted_mask;
+        v = static_cast<ValT>(r >> offset);
+    }
+
+    template <typename AddrT>
+    static void clear(AddrT addr)
+    {
+        auto r = RegBase::IO::read(addr);
+        r &= ~shifted_mask;
+        RegBase::IO::write(addr, r);
+    }
+};
+
 template <typename M, typename B>
 static constexpr M get_mask(B bit)
 {

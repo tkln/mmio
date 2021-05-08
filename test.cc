@@ -39,9 +39,13 @@ enum class TestModes {
 template <typename RegBase>
 using TestModeField = mmio::ModeField<RegBase, RegBase::mask(1, 0), 4, TestModes>;
 
+template <typename RegBase>
+using TestValueField = mmio::ValueField<RegBase, RegBase::mask(8, 0), 5, uint8_t>;
+
 using TestReg = mmio::Register<DummyIO, uint32_t, 0x1,
       TestBitField,
-      TestModeField
+      TestModeField,
+      TestValueField
 >;
 
 #define assert_eq(_a, _b)                                               \
@@ -70,4 +74,7 @@ int main()
 
     assert_eq(TestReg::get(TestBits::Bit0), false);
     assert_eq(TestReg::get(TestBits::Bit1), true);
+
+    TestReg::set<uint8_t>(123);
+    assert_eq(TestReg::get<uint8_t>(), 123);
 }
