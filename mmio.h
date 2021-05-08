@@ -6,7 +6,7 @@
 #ifndef MMIO_H
 #define MMIO_H
 
-#include <cstdint>
+#include <stdint.h>
 
 namespace mmio {
 
