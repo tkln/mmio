@@ -217,7 +217,8 @@ struct RegisterVal {
     using ImplRegBase = RegisterBase<ValIO<BackT>, BackT>;
     using Impl = RegisterImpl<ImplRegBase, Fields...>;
 
-    inline RegisterVal(uintptr_t addr) : addr(static_cast<uintptr_t>(addr))
+    template <typename T>
+    inline RegisterVal(T addr) : addr(static_cast<uintptr_t>(addr))
     {
     }
 
