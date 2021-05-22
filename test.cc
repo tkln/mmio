@@ -53,7 +53,7 @@ using TestReg = mmio::Register<DummyIO, uint32_t, 0x1,
         printf("FAIL(%d): %s != %s: (%s), (%s)\n", __LINE__, #_a, #_b,  \
                std::to_string(_a).c_str(), std::to_string(_b).c_str());
 
-int main()
+void test_reg()
 {
     TestReg::set(TestBits::Bit0, TestBits::Bit1);
     assert_eq(io_buf[1], 0x03);
@@ -77,4 +77,10 @@ int main()
 
     TestReg::set<uint8_t>(123);
     assert_eq(TestReg::get<uint8_t>(), 123);
+}
+
+int main()
+{
+    test_reg();
+    return 0;
 }
