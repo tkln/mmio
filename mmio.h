@@ -12,6 +12,8 @@ namespace mmio {
 
 template <typename T>
 struct VolatileIO {
+    using ValT = T;
+
     template <typename AddrT>
     static inline volatile T *addr_cast(AddrT addr)
     {
