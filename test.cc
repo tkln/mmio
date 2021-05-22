@@ -8,6 +8,11 @@
 
 #include "mmio.h"
 
+#define assert_eq(_a, _b)                                               \
+    if ((_a) != (_b))                                                   \
+        printf("FAIL(%d): %s != %s: (%s), (%s)\n", __LINE__, #_a, #_b,  \
+               std::to_string(_a).c_str(), std::to_string(_b).c_str());
+
 static uint32_t io_buf[256];
 
 struct DummyIO {
@@ -48,11 +53,6 @@ using TestReg = mmio::Register<DummyIO, uint32_t, 0x1,
       TestValueField
 >;
 
-#define assert_eq(_a, _b)                                               \
-    if ((_a) != (_b))                                                   \
-        printf("FAIL(%d): %s != %s: (%s), (%s)\n", __LINE__, #_a, #_b,  \
-               std::to_string(_a).c_str(), std::to_string(_b).c_str());
-
 void test_reg()
 {
     TestReg::set(TestBits::Bit0, TestBits::Bit1);
@@ -79,8 +79,20 @@ void test_reg()
     assert_eq(TestReg::get<uint8_t>(), 123);
 }
 
+using TestDynReg = mmio::DynRegister<DummyIO, uint32_t, uintptr_t,
+      TestBitField,
+      TestModeField,
+      TestValueField
+>;
+
+void test_dyn_reg()
+{
+    TestDynReg reg(0);
+}
+
 int main()
 {
     test_reg();
+    test_dyn_reg();
     return 0;
 }
