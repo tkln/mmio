@@ -39,6 +39,26 @@ struct VolatileIO {
     }
 };
 
+template <typename IO, uintptr_t base_addr, uintptr_t stride, uintptr_t offset>
+struct ArrayIO {
+    static constexpr uintptr_t get_addr(uintptr_t idx)
+    {
+        return base_addr + offset + stride * idx;
+    }
+
+    template <typename AddrT>
+    static inline typename IO::ValT read(AddrT idx)
+    {
+        return *IO::addr_cast(get_addr(idx));
+    }
+
+    template <typename AddrT>
+    static inline void write(AddrT idx, typename IO::ValT val)
+    {
+        *IO::addr_cast(get_addr(idx)) = val;
+    }
+};
+
 template <typename T>
 struct ValIO {
     static inline T read(T *addr)
