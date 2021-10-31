@@ -45,12 +45,12 @@ template <typename RegBase>
 using TestModeField = mmio::ModeField<RegBase, RegBase::mask(1, 0), 4, TestModes>;
 
 template <typename RegBase>
-using TestValueField = mmio::ValueField<RegBase, RegBase::mask(8, 0), 5, uint8_t>;
+using TestVarField = mmio::VarField<RegBase, RegBase::mask(8, 0), 5, uint8_t>;
 
 using TestReg = mmio::Register<DummyIO, uint32_t, 0x1,
       TestBitField,
       TestModeField,
-      TestValueField
+      TestVarField
 >;
 
 void test_reg()
@@ -82,7 +82,7 @@ void test_reg()
 using TestDynReg = mmio::DynRegister<DummyIO, uint32_t, uintptr_t,
       TestBitField,
       TestModeField,
-      TestValueField
+      TestVarField
 >;
 
 void test_dyn_reg()

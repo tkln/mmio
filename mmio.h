@@ -129,7 +129,7 @@ template <
     unsigned offset,
     typename ValT
 >
-struct ValueField {
+struct VarField {
     using BackT = typename RegBase::BackT;
     static constexpr BackT shifted_mask = mask << offset;
 
