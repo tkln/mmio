@@ -123,31 +123,40 @@ struct ModeField {
     static void clear(void) = delete;
 };
 
+template <typename T>
+struct VarFieldValue {
+    VarFieldValue() { }
+    explicit VarFieldValue(T v) : val(v) { }
+    operator T() const { return val; }
+    T val;
+};
+
 template <
     typename RegBase,
     typename RegBase::BackT mask,
     unsigned offset,
-    typename ValT
+    typename VarValT
 >
 struct VarField {
     using BackT = typename RegBase::BackT;
     static constexpr BackT shifted_mask = mask << offset;
+    using Val = VarValT;
 
     template <typename AddrT>
-    static inline void set(AddrT addr, ValT v)
+    static inline void set(AddrT addr, VarValT v)
     {
         auto r = RegBase::IO::read(addr);
         r &= ~shifted_mask;
-        r |= (static_cast<BackT>(v) << offset);
+        r |= (static_cast<BackT>(v.val) << offset);
         RegBase::IO::write(addr, r);
     }
 
     template <typename AddrT>
-    static inline void get(AddrT addr, ValT &v)
+    static inline void get(AddrT addr, VarValT &v)
     {
         auto r = RegBase::IO::read(addr);
         r &= shifted_mask;
-        v = static_cast<ValT>(r >> offset);
+        v = VarValT(r >> offset);
     }
 
     template <typename AddrT>

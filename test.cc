@@ -44,13 +44,25 @@ enum class TestModes {
 template <typename RegBase>
 using TestModeField = mmio::ModeField<RegBase, RegBase::mask(1, 0), 4, TestModes>;
 
+struct TestVarFieldValA: public mmio::VarFieldValue<uint8_t> {
+    using mmio::VarFieldValue<uint8_t>::VarFieldValue;
+};
+
+struct TestVarFieldValB: public mmio::VarFieldValue<uint8_t> {
+    using mmio::VarFieldValue<uint8_t>::VarFieldValue;
+};
+
 template <typename RegBase>
-using TestVarField = mmio::VarField<RegBase, RegBase::mask(8, 0), 5, uint8_t>;
+using TestVarFieldA = mmio::VarField<RegBase, RegBase::mask(8, 0), 5, TestVarFieldValA>;
+
+template <typename RegBase>
+using TestVarFieldB = mmio::VarField<RegBase, RegBase::mask(8, 0), 13, TestVarFieldValB>;
 
 using TestReg = mmio::Register<DummyIO, uint32_t, 0x1,
       TestBitField,
       TestModeField,
-      TestVarField
+      TestVarFieldA,
+      TestVarFieldB
 >;
 
 void test_reg()
@@ -75,14 +87,16 @@ void test_reg()
     assert_eq(TestReg::get(TestBits::Bit0), false);
     assert_eq(TestReg::get(TestBits::Bit1), true);
 
-    TestReg::set<uint8_t>(123);
-    assert_eq(TestReg::get<uint8_t>(), 123);
+    TestReg::set(TestVarFieldValA(123));
+    TestReg::set(TestVarFieldValB(250));
+    assert_eq(TestReg::get<TestVarFieldValA>(), 123);
+    assert_eq(TestReg::get<TestVarFieldValB>(), 250);
 }
 
 using TestDynReg = mmio::DynRegister<DummyIO, uint32_t, uintptr_t,
       TestBitField,
       TestModeField,
-      TestVarField
+      TestVarFieldA
 >;
 
 void test_dyn_reg()
