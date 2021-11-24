@@ -6,6 +6,10 @@ test: test.o
 	$(CXX) $(CXXFLAGS) $< -o $@
 test.o: test.cc mmio.h
 
+.PHONY: run-test
+run-test: test
+	./test
+
 .PHONY: clean
 clean:
 	rm -f test.o test
