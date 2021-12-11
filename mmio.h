@@ -277,7 +277,7 @@ struct RegisterVal {
     }
 
     template <typename ValT>
-    inline RegisterVal get(ValT v) const
+    inline RegisterVal get(ValT &v) const
     {
         return Impl::get(&val, v);
     }
@@ -395,7 +395,7 @@ struct RegisterWO : Register<IO, BaseT, addr, Fields...> {
     static inline void clear(Vals... v) = delete;
 
     template <typename ValT>
-    static inline auto get(ValT v) = delete;
+    static inline auto get(ValT &v) = delete;
 
     /* TODO Bit masks and write() */
     static inline const typename Impl::ValT read() = delete;
@@ -426,13 +426,19 @@ struct DynRegister {
     }
 
     template <typename ValT>
-    inline auto get(ValT v)
+    inline auto get(ValT &v)
     {
         return Impl::get(addr, v);
     }
 
     [[nodiscard]]
     inline typename Impl::ValT read()
+    {
+        return typename Impl::ValT(addr);
+    }
+
+    [[nodiscard]]
+    inline typename Impl::ValT new_val()
     {
         return typename Impl::ValT(addr);
     }
